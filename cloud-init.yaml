@@ -1,0 +1,21 @@
+#cloud-config
+users:
+  - name: leo
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC6jjw2UbrhY0S1fgNOVk0m0AJlpxYdOtHBLfGDNnLOWCLk7pQA9xagZ2CTnbSQu/3BNaeQK3YQUo8nNAICuAvH4OAy4fJa3UOmAUBTjTk4U3rmt9S74AlzJQ425XxWcnX9sceXObPKNTSbQNoGNVnaLO5O8odKqP8dZBYm/j0QV7c6gdXVm3iT2Iz48rBHH+UbxPQiz6JA+ZSY6zXN2Vl+o0C1aTAAREIluc0F8FJG1invl27o58EugcpNd1LTh9bLXuGGMlo7W2ekGwxPJPQvI2Fg+DUBCKJrI5diPxsKzOyCWj6v7jHMzxBQ0Zz8D7IAcPf40n56lqWet0sVNrpisueOAlYQKsm2GLPSWF1yJsK8am/mZEmbnivIYmuP6BvdsALB2VZKXd8KclQGaFTVqCMa6pWggKdsMtqPUl8MtcitzZ8psRvGzifDMjfeS/ouO5ApBn7cFOQvJ6yNP5F+GOQt8zhej/kmaMkb2lJYslXpvIRhLXyISsXWHmZDouEe8WDlK+RWr6c2VxHxwiRhOhAg1z4YFL/d4+DkxwHTjvnfrrv4hLyPWG0bhn/cqYZhw6JZ69LyngDFKPBXXDlVKrS4oeAZbbNiVS2rtlnRCdwc/A+k8QTp/RAn4X0yuIpKCsePZ7bBtbND1aOGB/m/BkHFbBnKLzHy1zBk0bcZww== root@k8s
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+package_update: true
+package_upgrade: true
+packages:
+  - nginx
+  - nano
+  - software-properties-common
+runcmd:
+  - mkdir -p /home/leo/.ssh
+  - chown -R leo:leo /home/leo/.ssh
+  - chmod 700 /home/leo/.ssh
+  - sudo add-apt-repository ppa:deadsnakes/ppa -y
+  - sudo apt-get update
+
