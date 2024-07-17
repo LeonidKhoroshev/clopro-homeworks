@@ -6,16 +6,16 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
-package_update: true
-package_upgrade: true
-packages:
-  - nginx
-  - nano
-  - software-properties-common
-runcmd:
-  - mkdir -p /home/leo/.ssh
-  - chown -R leo:leo /home/leo/.ssh
-  - chmod 700 /home/leo/.ssh
-  - sudo add-apt-repository ppa:deadsnakes/ppa -y
-  - sudo apt-get update
-
+#package_update: true
+#package_upgrade: true
+write_files:
+  - path: /var/www/html/index.html
+    content: |
+      <html>
+      <head><title>Welcome to LAMP</title></head>
+      <body>
+         <h1>Welcome to LAMP</h1>
+         <p>This is a LAMP server.</p>
+         <img src="https://storage.yandexcloud.net/khoroshevleonid-20240717/image.jpg" />
+      </body>
+      </html>
