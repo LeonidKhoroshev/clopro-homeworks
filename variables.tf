@@ -99,113 +99,136 @@ variable "image_file_path" {
   default     = "/home/leo/clopro-homeworks/image.jpg"
 }
 
+
+### Variablables for KMS
+
+variable "kms_key_name"  {
+  type        = string
+  default     = "kms-key"
+}
+
+variable "kms_key_description" {
+  type        = string
+  default     = "symmetric key for object storage"
+}
+
+variable "default_algorithm" {
+  type        = string
+  default     = "AES_128"
+}
+
+variable "prevent_destroy" {
+  type        = bool
+  default     = true
+}
+
 ### Variables for LAMP group
 
-variable "lamp_name" {
-  type        = string
-  default     = "lamp-group"
-}
+#variable "lamp_name" {
+#  type        = string
+#  default     = "lamp-group"
+#}
   
 
-variable "lamp_platform" {
-  type        = string
-  default     = "standard-v1"
-}
+#variable "lamp_platform" {
+#  type        = string
+#  default     = "standard-v1"
+#}
 
-variable "lamp_memory" {
-  type        = number
-  default     = 2
-}
+#variable "lamp_memory" {
+#  type        = number
+#  default     = 2
+#}
 
-variable "lamp_cores" {
-  type        = number
-  default     = 2
-}
+#variable "lamp_cores" {
+#  type        = number
+#  default     = 2
+#}
 
-variable "lamp_core_fraction" {
-  description = "guaranteed vCPU, for yandex cloud - 20, 50 or 100 "
-  type        = number
-  default     = "20"
-}
+#variable "lamp_core_fraction" {
+#  description = "guaranteed vCPU, for yandex cloud - 20, 50 or 100 "
+#  type        = number
+#  default     = "20"
+#}
 
 
-variable "lamp_disk_image_id" {
-  type        = string
-  default     = "fd827b91d99psvq5fjit"
-}
+#variable "lamp_disk_image_id" {
+#  type        = string
+#  default     = "fd827b91d99psvq5fjit"
+#}
 
-variable "lamp_scheduling_policy" {
-  type        = bool
-  default     = "true"
-}
+#variable "lamp_scheduling_policy" {
+#  type        = bool
+#  default     = "true"
+#}
 
-variable "lamp_size" {
-  type        = number
-  default     = 3
-}
+#variable "lamp_size" {
+#  type        = number
+#  default     = 3
+#}
 
-variable "lamp_max_unavailable" {
-  type        = number
-  default     = 1
-}
+#variable "lamp_max_unavailable" {
+#  type        = number
+#  default     = 1
+#}
 
-variable "lamp_max_expansion" {
-  type        = number
-  default     = 3
-}
+#variable "lamp_max_expansion" {
+#  type        = number
+#  default     = 3
+#}
 
-variable "lamp_interval" {
-  type        = number
-  default     = 10
-}
+#variable "lamp_interval" {
+#  type        = number
+#  default     = 10
+#}
 
-variable "lamp_timeout" {
-  type        = number
-  default     = 5
-}
+#variable "lamp_timeout" {
+#  type        = number
+#  default     = 5
+#}
 
-variable "healthy_threshold" {
-  type        = number
-  default     = 2
-}
+#variable "healthy_threshold" {
+#  type        = number
+#  default     = 2
+#}
 
-variable "unhealthy_threshold" {
-  type        = number
-  default     = 2
-}
+#variable "unhealthy_threshold" {
+#  type        = number
+#  default     = 2
+#}
 
-variable "lamp_port" {
-  type        = number
-  default     = 80
-}
+#variable "lamp_port" {
+#  type        = number
+#  default     = 80
+#}
 
 ### Variables for Load balancer
 
-variable "balancer_name" {
-  type        = string
-  default     = "balancer"
-}
+#variable "balancer_name" {
+#  type        = string
+#  default     = "balancer"
+#}
 
 
-variable "balancer_listener_name" {
-  type        = string
-  default     = "http"
-}
+#variable "balancer_listener_name" {
+#  type        = string
+#  default     = "http"
+#}
 
-variable "balancer_listener_port" {
-  type        = number
-  default     = 80
-}
+#variable "balancer_listener_port" {
+#  type        = number
+#  default     = 80
+#}
 
-variable "balancer_interval" {
-  type        = number
-  default     = 2
-}
+#variable "balancer_interval" {
+#  type        = number
+#  default     = 2
+#}
 
-variable "balancer_timeout" {
-  type        = number
-  default     = 1
-}
+#variable "balancer_timeout" {
+#  type        = number
+#  default     = 1
+#}
 
 #variable "unhealthy_threshold" {
 #  type        = number
