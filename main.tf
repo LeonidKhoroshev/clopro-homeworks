@@ -42,6 +42,14 @@ resource "yandex_storage_bucket" "mystorage" {
   access_key            = yandex_iam_service_account_static_access_key.static-key.access_key
   secret_key            = yandex_iam_service_account_static_access_key.static-key.secret_key
   acl                   = var.acl
+  server_side_encryption_configuration {
+         rule {
+           apply_server_side_encryption_by_default {
+             kms_master_key_id = yandex_kms_symmetric_key.key-a.id
+             sse_algorithm     = "aws:kms"
+          }
+     }
+   }  
 }
 
 resource "yandex_storage_object" "image" {
@@ -54,102 +62,111 @@ resource "yandex_storage_object" "image" {
   acl    = var.acl
 }
 
-resource "yandex_resourcemanager_folder_iam_member" "sa-vpc-user" {
-  folder_id = var.folder_id
-  role      = "vpc.user"
-  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
+resource "yandex_kms_symmetric_key" "key-a" {
+  name              = var.kms_key_name
+  description       = var.kms_key_description
+  default_algorithm = var.default_algorithm
+  lifecycle {
+    prevent_destroy = false
+  }
 }
 
-resource "yandex_resourcemanager_folder_iam_member" "sa-editor" {
-  folder_id = var.folder_id
-  role      = "editor"
-  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
-}
+#resource "yandex_resourcemanager_folder_iam_member" "sa-vpc-user" {
+#  folder_id = var.folder_id
+#  role      = "vpc.user"
+#  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
+#}
 
-resource "yandex_compute_instance_group" "lamp_group" {
-  name = var.lamp_name
-  service_account_id = yandex_iam_service_account.sa.id
-  instance_template {
-    platform_id = var.lamp_platform   
-    resources {
-      memory = var.lamp_memory
-      cores  = var.lamp_cores
-      core_fraction = var.lamp_core_fraction
-  }
-  boot_disk {
-    initialize_params {
-      image_id = var.lamp_disk_image_id
-    }
-  }
-  network_interface {
-    subnet_ids = [yandex_vpc_subnet.public_subnet.id]
-    nat = var.nat
-  }  
-  scheduling_policy {
-    preemptible = var.lamp_scheduling_policy
-  }
+#resource "yandex_resourcemanager_folder_iam_member" "sa-editor" {
+#  folder_id = var.folder_id
+#  role      = "editor"
+#  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
+#}
 
-  metadata = {
-      user-data = "${file("/home/leo/clopro-homeworks/cloud-init.yaml")}"
-   }
-  }
+#resource "yandex_compute_instance_group" "lamp_group" {
+#  name = var.lamp_name
+#  service_account_id = yandex_iam_service_account.sa.id
+#  instance_template {
+#    platform_id = var.lamp_platform   
+#    resources {
+#      memory = var.lamp_memory
+#      cores  = var.lamp_cores
+#      core_fraction = var.lamp_core_fraction
+#  }
+#  boot_disk {
+#    initialize_params {
+#      image_id = var.lamp_disk_image_id
+#    }
+#  }
+#  network_interface {
+#    subnet_ids = [yandex_vpc_subnet.public_subnet.id]
+#    nat = var.nat
+#  }  
+#  scheduling_policy {
+#    preemptible = var.lamp_scheduling_policy
+#  }
+
+#  metadata = {
+#      user-data = "${file("/home/leo/clopro-homeworks/cloud-init.yaml")}"
+#   }
+#  }
   
-  scale_policy {
-    fixed_scale {
-      size = var.lamp_size
-    }
-  }
+#  scale_policy {
+#    fixed_scale {
+#      size = var.lamp_size
+#    }
+#  }
 
-  deploy_policy {
-    max_unavailable = var.lamp_max_unavailable
-    max_expansion   = var.lamp_max_expansion
-  }
+#  deploy_policy {
+#    max_unavailable = var.lamp_max_unavailable
+#    max_expansion   = var.lamp_max_expansion
+#  }
 
-  health_check {
-    interval = var.lamp_interval
-    timeout  = var.lamp_timeout
-    healthy_threshold   = var.healthy_threshold
-    unhealthy_threshold = var.unhealthy_threshold
-    tcp_options {
-      port = var.lamp_port
-    }
-  }
+#  health_check {
+#    interval = var.lamp_interval
+#    timeout  = var.lamp_timeout
+#    healthy_threshold   = var.healthy_threshold
+#    unhealthy_threshold = var.unhealthy_threshold
+#    tcp_options {
+#      port = var.lamp_port
+#    }
+#  }
 
-  allocation_policy {
-    zones = [var.subnet_zone]
-  }
+#  allocation_policy {
+#    zones = [var.subnet_zone]
+#  }
 
-  load_balancer {
-        target_group_name = "lamp-group"
-  }
-}
+#  load_balancer {
+#        target_group_name = "lamp-group"
+#  }
+#}
 
 
-resource "yandex_lb_network_load_balancer" "balancer" {
-  name        = var.balancer_name
-  folder_id   = var.folder_id
-  listener {
-    name = var.balancer_listener_name
-    port = var.balancer_listener_port
-    external_address_spec {
-      ip_version = "ipv4"
-    }
-  }
-attached_target_group {
-    target_group_id = yandex_compute_instance_group.lamp_group.load_balancer.0.target_group_id
-    healthcheck {
-      name = var.balancer_listener_name
-      interval = var.balancer_interval
-      timeout = var.balancer_timeout
-      unhealthy_threshold = var.unhealthy_threshold
-      healthy_threshold = var.healthy_threshold
-      http_options {
-        port = var.balancer_listener_port
-        path = "/"
-      }
-    }
-  }
-}
+#resource "yandex_lb_network_load_balancer" "balancer" {
+#  name        = var.balancer_name
+#  folder_id   = var.folder_id
+#  listener {
+#    name = var.balancer_listener_name
+#    port = var.balancer_listener_port
+#    external_address_spec {
+#      ip_version = "ipv4"
+#    }
+#  }
+#attached_target_group {
+#   target_group_id = yandex_compute_instance_group.lamp_group.load_balancer.0.target_group_id
+#    healthcheck {
+#      name = var.balancer_listener_name
+#      interval = var.balancer_interval
+#      timeout = var.balancer_timeout
+#      unhealthy_threshold = var.unhealthy_threshold
+#      healthy_threshold = var.healthy_threshold
+#      http_options {
+#        port = var.balancer_listener_port
+#        path = "/"
+#      }
+#    }
+#  }
+#}
 #resource "yandex_compute_instance" "nat_instance" {
 #  name = var.nat_name
 
