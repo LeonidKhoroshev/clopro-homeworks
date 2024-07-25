@@ -58,69 +58,165 @@ variable "private_v4_cidr_blocks" {
   default     = ["192.168.20.0/24"]
 }
 
-variable "private_subnet_zone" {
-  type        = string
-  default     = "ru-central1-a"
+variable "private_subnet_zones" {
+  type    = list(string)
+  default = ["ru-central1-a", "ru-central1-b"]
 }
 
-variable "lamp_sa_name" {
-  type        = string
-  default     = "lamp-service-account"
+
+#### Variables for MySQL cluster
+
+variable "cluster_name" {
+  type      = string
+  default   = "my-cluster"
 }
 
-### Variables for Service Account
+variable "cluster_env" {
+  type = string
+  description = "Environment type: PRODUCTION or PRESTABLE"
+  default     = "PRESTABLE"
+}
 
-variable "sa_name" {
+variable "deletion_protection" {
+  type        = bool
+  default     = "false"
+}
+
+variable "resource_preset_id" {
+  type        = string
+  default     = "b1.medium"
+}
+
+variable "disk_type" {
+  type        = string
+  default     = "network-ssd"
+}
+
+variable "disk_size" {
+  type        = number
+  default     = 20
+}
+
+variable "version_mysql" {
+  type                      = string
+  default                   = "8.0"
+}
+
+variable "ha" {
+  type                      = bool
+  description               = "If this is a multiple instance deployment, choose `true` to deploy 2 instances"
+  default                   = true
+}
+
+variable "hours" {
+  type                     = number
+  default                  = 23
+}
+
+variable "minutes" {
+  type                    = number
+  default                 = 59
+}
+
+
+### variables for database
+
+variable "database_name" {
+  type        = string
+  default     = "netology_db"
+}
+
+variable "size" {
+  type        = number
+  default     = 2
+}
+
+variable "group_count" {
+  type        = number
+  default     = 1
+}
+
+variable "storage_type_id" {
+  type        = string
+  description = "ssd or hdd"
+  default     = "hdd"
+}
+
+variable "user_name" {
   type        = string
   default     = "leo"
 }
 
+
+variable "user_password" {
+  type        = string
+  sensitive   = true
+  default     = "741852Leo"
+}
+
+variable "user_roles" {
+  type        = list(string)
+  default     = ["ALL"]
+}
+
+#variable "lamp_sa_name" {
+#  type        = string
+#  default     = "lamp-service-account"
+#}
+
+### Variables for Service Account
+
+#variable "sa_name" {
+#  type        = string
+#  default     = "leo"
+#}
+
 ### Variables for Object storage
 
-variable "student_name" {
-  type        = string
-  default     = "khoroshevleonid"
-}
+#variable "student_name" {
+#  type        = string
+#  default     = "khoroshevleonid"
+#}
 
-variable "acl" {
-  type        = string
-  default     = "public-read"
-}
+#variable "acl" {
+#  type        = string
+#  default     = "public-read"
+#}
 
 ### Variables for Yandex_storage_object
 
-variable "image_file_name" {
-  type        = string
-  default     = "image.jpg"
-}
+#variable "image_file_name" {
+#  type        = string
+#  default     = "image.jpg"
+#}
 
-variable "image_file_path" {
-  type        = string
-  default     = "/home/leo/clopro-homeworks/image.jpg"
-}
+#variable "image_file_path" {
+#  type        = string
+#  default     = "/home/leo/clopro-homeworks/image.jpg"
+#}
 
 
 ### Variablables for KMS
 
-variable "kms_key_name"  {
-  type        = string
-  default     = "kms-key"
-}
+#variable "kms_key_name"  {
+#  type        = string
+#  default     = "kms-key"
+#}
 
-variable "kms_key_description" {
-  type        = string
-  default     = "symmetric key for object storage"
-}
+#variable "kms_key_description" {
+#  type        = string
+#  default     = "symmetric key for object storage"
+#}
 
-variable "default_algorithm" {
-  type        = string
-  default     = "AES_128"
-}
+#variable "default_algorithm" {
+#  type        = string
+#  default     = "AES_128"
+#}
 
-variable "prevent_destroy" {
-  type        = bool
-  default     = true
-}
+#variable "prevent_destroy" {
+#  type        = bool
+#  default     = true
+#}
 
 ### Variables for LAMP group
 

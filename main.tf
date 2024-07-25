@@ -1,75 +1,145 @@
 resource "yandex_vpc_network" "my_vpc" {
-  name = var.VPC_name
+  name                = var.VPC_name
 }
 
 resource "yandex_vpc_subnet" "public_subnet" {
-  name           = var.subnet_name
-  v4_cidr_blocks = var.v4_cidr_blocks
-  zone           = var.subnet_zone
-  network_id     = yandex_vpc_network.my_vpc.id
+  name                = var.subnet_name
+  v4_cidr_blocks      = var.v4_cidr_blocks
+  zone                = var.subnet_zone
+  network_id          = yandex_vpc_network.my_vpc.id
 }
+
 
 resource "yandex_vpc_subnet" "private_subnet" {
-  name           = var.private_subnet_name
-  v4_cidr_blocks = var.private_v4_cidr_blocks
-  zone           = var.private_subnet_zone
-  network_id     = yandex_vpc_network.my_vpc.id
+  count               = length(var.private_subnet_zones)
+  name                = "${var.private_subnet_name}-${var.private_subnet_zones[count.index]}"
+  v4_cidr_blocks      = [cidrsubnet(var.private_v4_cidr_blocks[0], 4, count.index)]
+  zone                = var.private_subnet_zones[count.index]
+  network_id          = yandex_vpc_network.my_vpc.id
 }
 
-resource "yandex_iam_service_account" "sa" {
-  name = var.sa_name
-}
+resource "yandex_vpc_security_group" "my_security_group" {
+  name        = "my-security-group"
+  description = "Security group for MySQL access"
+  network_id  = yandex_vpc_network.my_vpc.id
 
-resource "yandex_resourcemanager_folder_iam_member" "sa-admin" {
-  folder_id = var.folder_id
-  role      = "storage.admin"
-  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
-}
+  ingress {
+    protocol    = "tcp"
+    from_port   = 3306
+    to_port     = 3306
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 
-resource "yandex_resourcemanager_folder_iam_member" "sa-storage-put" {
-  folder_id = var.folder_id
-  role      = "storage.uploader"
-  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
-}
-
-resource "yandex_iam_service_account_static_access_key" "static-key" {
-  service_account_id = yandex_iam_service_account.sa.id
-  description        = "static access key for object storage"
-}
-
-resource "yandex_storage_bucket" "mystorage" {
-  bucket                = "${var.student_name}-${formatdate("YYYYMMDD", timestamp())}"
-  access_key            = yandex_iam_service_account_static_access_key.static-key.access_key
-  secret_key            = yandex_iam_service_account_static_access_key.static-key.secret_key
-  acl                   = var.acl
-  server_side_encryption_configuration {
-         rule {
-           apply_server_side_encryption_by_default {
-             kms_master_key_id = yandex_kms_symmetric_key.key-a.id
-             sse_algorithm     = "aws:kms"
-          }
-     }
-   }  
-}
-
-resource "yandex_storage_object" "image" {
-  access_key            = yandex_iam_service_account_static_access_key.static-key.access_key
-  secret_key            = yandex_iam_service_account_static_access_key.static-key.secret_key
-  bucket = "${var.student_name}-${formatdate("YYYYMMDD", timestamp())}"
-  key    = var.image_file_name
-  source = var.image_file_path
-  depends_on = [yandex_storage_bucket.mystorage]
-  acl    = var.acl
-}
-
-resource "yandex_kms_symmetric_key" "key-a" {
-  name              = var.kms_key_name
-  description       = var.kms_key_description
-  default_algorithm = var.default_algorithm
-  lifecycle {
-    prevent_destroy = false
+  egress {
+    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 65535
+    v4_cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "yandex_mdb_mysql_cluster" "example" {
+  name                = var.cluster_name
+  environment         = var.cluster_env
+  network_id          = yandex_vpc_network.my_vpc.id
+  security_group_ids  = [yandex_vpc_security_group.my_security_group.id]
+  version             = var.version_mysql
+  deletion_protection = var.deletion_protection
+
+  
+  backup_window_start {
+    hours   = var.hours
+    minutes = var.minutes
+  }
+
+  maintenance_window {
+    type = "ANYTIME"
+  }
+
+  resources {
+    resource_preset_id = var.resource_preset_id
+    disk_type_id       = var.disk_type
+    disk_size          = var.disk_size
+  }
+
+  dynamic "host" {
+    for_each = var.private_subnet_zones
+    content {
+      zone      = host.value
+      subnet_id = element(yandex_vpc_subnet.private_subnet[*].id, index(var.private_subnet_zones, host.value))
+    }
+  }
+}
+
+resource "yandex_mdb_mysql_database" "my_database" {
+  name         = var.database_name
+  cluster_id   = yandex_mdb_mysql_cluster.example.id
+}
+
+resource "yandex_mdb_mysql_user" "app" {
+  cluster_id   = yandex_mdb_mysql_cluster.example.id
+  name         = var.user_name
+  password     = var.user_password
+  permission {
+    database_name = var.database_name
+    roles         = var.user_roles
+  }
+}
+
+#resource "yandex_iam_service_account" "sa" {
+#  name = var.sa_name
+#}
+
+#resource "yandex_resourcemanager_folder_iam_member" "sa-admin" {
+#  folder_id = var.folder_id
+#  role      = "storage.admin"
+#  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
+#}
+
+#resource "yandex_resourcemanager_folder_iam_member" "sa-storage-put" {
+#  folder_id = var.folder_id
+#  role      = "storage.uploader"
+#  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
+#}
+
+#resource "yandex_iam_service_account_static_access_key" "static-key" {
+#  service_account_id = yandex_iam_service_account.sa.id
+#  description        = "static access key for object storage"
+#}
+
+#resource "yandex_storage_bucket" "mystorage" {
+#  bucket                = "${var.student_name}-${formatdate("YYYYMMDD", timestamp())}"
+#  access_key            = yandex_iam_service_account_static_access_key.static-key.access_key
+#  secret_key            = yandex_iam_service_account_static_access_key.static-key.secret_key
+#  acl                   = var.acl
+#  server_side_encryption_configuration {
+#         rule {
+#           apply_server_side_encryption_by_default {
+#             kms_master_key_id = yandex_kms_symmetric_key.key-a.id
+#             sse_algorithm     = "aws:kms"
+#          }
+#     }
+#   }  
+#}
+
+#resource "yandex_storage_object" "image" {
+#  access_key            = yandex_iam_service_account_static_access_key.static-key.access_key
+#  secret_key            = yandex_iam_service_account_static_access_key.static-key.secret_key
+#  bucket = "${var.student_name}-${formatdate("YYYYMMDD", timestamp())}"
+#  key    = var.image_file_name
+#  source = var.image_file_path
+#  depends_on = [yandex_storage_bucket.mystorage]
+#  acl    = var.acl
+#}
+
+#resource "yandex_kms_symmetric_key" "key-a" {
+#  name              = var.kms_key_name
+#  description       = var.kms_key_description
+#  default_algorithm = var.default_algorithm
+#  lifecycle {
+#    prevent_destroy = false
+#  }
+#}
 
 #resource "yandex_resourcemanager_folder_iam_member" "sa-vpc-user" {
 #  folder_id = var.folder_id
