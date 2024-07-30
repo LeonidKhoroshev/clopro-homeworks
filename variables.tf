@@ -30,19 +30,24 @@ variable "VPC_name" {
 
 ### Variables for Public subnet
 
-variable "subnet_name" {
+variable "public_subnet_name" {
   type        = string
   default     = "public"
 }
 
-variable "v4_cidr_blocks" {
+variable "public_v4_cidr_blocks" {
   type        = list(string)
   default     = ["192.168.10.0/24"]
 }
 
 variable "subnet_zone" {
   type        = string
-  default     = "ru-central1-a"
+  default     = "ru-central1"
+}
+
+variable "public_subnet_zones" {
+  type    = list(string)
+  default = ["ru-central1-a", "ru-central1-b",  "ru-central1-d"]
 }
 
 
@@ -159,6 +164,24 @@ variable "user_roles" {
   default     = ["ALL"]
 }
 
+### variables for k8s cluster
+
+variable "k8s_service_account_name" {
+  type        = string
+  default     = "leo"
+}
+
+variable "k8s_cluster_name" {
+  type        = string
+  default     = "k8s-cluster"
+}
+
+variable "region" {
+  type        = string
+  default     = "ru-central1"
+}
+
+
 #variable "lamp_sa_name" {
 #  type        = string
 #  default     = "lamp-service-account"
@@ -196,27 +219,27 @@ variable "user_roles" {
 #}
 
 
-### Variablables for KMS
+### Variables for KMS
 
-#variable "kms_key_name"  {
-#  type        = string
-#  default     = "kms-key"
-#}
+variable "kms_key_name"  {
+  type        = string
+  default     = "kms-key"
+}
 
-#variable "kms_key_description" {
-#  type        = string
-#  default     = "symmetric key for object storage"
-#}
+variable "kms_key_description" {
+  type        = string
+  default     = "symmetric key for object storage"
+}
 
-#variable "default_algorithm" {
-#  type        = string
-#  default     = "AES_128"
-#}
+variable "default_algorithm" {
+  type        = string
+  default     = "AES_128"
+}
 
-#variable "prevent_destroy" {
-#  type        = bool
-#  default     = true
-#}
+variable "prevent_destroy" {
+  type        = bool
+  default     = true
+}
 
 ### Variables for LAMP group
 
@@ -339,25 +362,25 @@ variable "user_roles" {
 
 ### Variables for NAT instance
 
-#variable "nat_name" {
-#  type        = string
-#  default     = "nat-instance"
-#}
+variable "nat_name" {
+  type        = string
+  default     = "nat-instance"
+}
 
-#variable "nat_cores" {
-#  type        = number
-#  default     = 2
-#}
+variable "nat_cores" {
+  type        = number
+  default     = 2
+}
 
-#variable "nat_memory" {
-#  type        = number
-#  default     = 2
-#}
+variable "nat_memory" {
+  type        = number
+  default     = 2
+}
 
-#variable "nat_disk_image_id" {
-#  type        = string
-#  default     = "fd80mrhj8fl2oe87o4e1"
-#}
+variable "nat_disk_image_id" {
+  type        = string
+  default     = "fd80mrhj8fl2oe87o4e1"
+}
 
 variable "nat" {
   type        = bool
@@ -366,52 +389,52 @@ variable "nat" {
 
 variable "nat_primary_v4_address" {
   type        = string
-  default     = "192.168.10.254"
+  default     = "192.168.10.3"
 }
 
 
 ### Variables for public_vm
 
-#variable "public_vm_name" {
-#  type        = string
-#  default     = "public-vm"
-#}
+variable "public_vm_name" {
+  type        = string
+  default     = "public-vm"
+}
 
-#variable "public_vm_platform" {
-#  type        = string
-#  default     = "standard-v1"
-#}
+variable "public_vm_platform" {
+  type        = string
+  default     = "standard-v1"
+}
 
-#variable "public_vm_core" { 
-#  type        = number
-#  default     = "4"
-#}
+variable "public_vm_core" { 
+  type        = number
+  default     = "4"
+}
 
-#variable "public_vm_memory" {
-#  type        = number
-#  default     = "8"
-#}
+variable "public_vm_memory" {
+  type        = number
+  default     = "8"
+}
 
-#variable "public_vm_core_fraction" {
-#  description = "guaranteed vCPU, for yandex cloud - 20, 50 or 100 "
-#  type        = number
-#  default     = "20"
-#}
+variable "public_vm_core_fraction" {
+  description = "guaranteed vCPU, for yandex cloud - 20, 50 or 100 "
+  type        = number
+  default     = "20"
+}
 
-#variable "public_vm_disk_size" {
-#  type        = number
-#  default     = "50"
-#}
+variable "public_vm_disk_size" {
+  type        = number
+  default     = "50"
+}
 
-#variable "public_vm_image_id" {
-#  type        = string
-#  default     = "fd893ak78u3rh37q3ekn"
-#}
+variable "public_vm_image_id" {
+  type        = string
+  default     = "fd893ak78u3rh37q3ekn"
+}
 
-#variable "scheduling_policy" {
-#  type        = bool
-#  default     = "true"
-#}
+variable "scheduling_policy" {
+  type        = bool
+  default     = "true"
+}
 
 ### Variables for Private route table
 
